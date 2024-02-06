@@ -6,6 +6,8 @@
         {{ n.ymd }} {{ n.subject }}
       </nuxt-link>
     </div>
+    <p>Test With Comment</p>
+    <nuxt-link to="/news/test_with_comment">Test With Comment</nuxt-link>
   </div>
 </template>
 
