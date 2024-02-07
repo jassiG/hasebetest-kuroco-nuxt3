@@ -6,9 +6,6 @@
       {{ resultMessage }}
     </p>
     <div>
-        please type your name: <input v-model="userName" type="text" placeholder="your name">
-    </div>
-    <div>
         <ul v-for="comment in comments" :key="comment.comment_id">
             <li>
                 {{ comment.note }} by {{ comment.name }}
@@ -19,7 +16,7 @@
         </ul>
         <form @submit.prevent="submitComment">
             <input v-model="inputComment" type="text" placeholder="comment">
-            <button type="submit" :disabled="inputComment === '' || userName === ''">
+            <button type="submit" :disabled="inputComment === ''">
                 submit
             </button>
         </form>
@@ -28,8 +25,11 @@
 </template>
   
 <script setup>
-import { ref } from 'vue';
+definePageMeta({
+  middleware: ['auth']
+})
 
+const profile = ref(null);
 const response = ref(null);
 const comments = ref([]);
 const userName = ref('');
@@ -61,15 +61,24 @@ async function fetchData() {
 onMounted(() => {
   commentHistory.value = JSON.parse(localStorage.getItem(COMMENT_HISTORY_KEY)) || [];
 });
+getProfile();
 fetchData();
 
+async function getProfile() {
+  const res = await useFetch('/rcms-api/1/profile',{
+    baseURL:config.public.apiBase,
+    credentials: 'include',
+  });
+  profile.value = res.data.value;
+}
 async function submitComment() {
   const delkey = `${userName.value}_${Date.now()}`;
   const submitResponse = await $fetch('/rcms-api/21/comment', {
     method: 'POST',
     body: JSON.stringify({
       module_id: response.value.details.topics_id,
-      name: userName.value,
+      name: `${profile.value.name1} ${profile.value.name2}`,
+      mail: profile.value.email,
       note: inputComment.value,
       delkey,
     }),
