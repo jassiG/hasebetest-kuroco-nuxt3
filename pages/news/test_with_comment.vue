@@ -12,7 +12,7 @@
         <ul v-for="comment in comments" :key="comment.comment_id">
             <li>
                 {{ comment.note }} by {{ comment.name }}
-                <button type="button" @click="() => deleteComment(comment.comment_id)">
+                <button v-if="commentHistory.map(({ id }) => id).includes(comment.comment_id)" type="button" @click="() => deleteComment(comment.comment_id)">
                     delete
                 </button>
             </li>
@@ -31,11 +31,12 @@
 import { ref } from 'vue';
 
 const response = ref(null);
-let comments = ref([]);
+const comments = ref([]);
 const userName = ref('');
 const inputComment = ref('');
 const resultMessage = ref(null);
 const config = useRuntimeConfig();
+const commentHistory = ref([]);
 
 async function getAllComments(topics_id) {
   const res = await useFetch(`/rcms-api/21/comments?module_id=${topics_id}&cnt=999`,{
@@ -46,6 +47,8 @@ async function getAllComments(topics_id) {
   return list;
 }
 
+const COMMENT_HISTORY_KEY = 'CommentHistory';
+
 async function fetchData() {
   const res = await useFetch('/rcms-api/21/newsdetail/965',{
     baseURL:config.public.apiBase,
@@ -55,37 +58,56 @@ async function fetchData() {
   comments.value = await getAllComments(response.value.details.topics_id);
 }
 
+onMounted(() => {
+  commentHistory.value = JSON.parse(localStorage.getItem(COMMENT_HISTORY_KEY)) || [];
+});
 fetchData();
 
 async function submitComment() {
-  await $fetch('/rcms-api/21/comment', {
+  const delkey = `${userName.value}_${Date.now()}`;
+  const submitResponse = await $fetch('/rcms-api/21/comment', {
     method: 'POST',
     body: JSON.stringify({
       module_id: response.value.details.topics_id,
       name: userName.value,
       note: inputComment.value,
+      delkey,
     }),
     baseURL:config.public.apiBase,
     credentials: 'include',
   });
+  addCommentHistory({ id: submitResponse.id, delkey });
   comments.value = await getAllComments(response.value.details.topics_id);
-  inputComment = '';
+  inputComment.value = '';
 }
 
 async function deleteComment(commentId) {
   try {
     await $fetch(`/rcms-api/21/comment_delete/${commentId}`, {
       method: 'POST',
-      body: JSON.stringify({
-        delkey: '',
-      }),
       baseURL:config.public.apiBase,
       credentials: 'include',
+      body: {
+        delkey: commentHistory.value.find(({ id }) => `${id}` === `${commentId}`).delkey
+      }
     });
+    deleteCommentHistory(commentId);
     comments.value = await getAllComments(response.value.details.topics_id);
-    inputComment = '';
+    inputComment.value = '';
   } catch (error) {
-    resultMessage = error.message;
+    resultMessage.value = error.message;
   }
+}
+async function addCommentHistory (payload) {
+  const restored = JSON.parse(localStorage.getItem(COMMENT_HISTORY_KEY)) || []
+  restored.push(payload)
+  localStorage.setItem(COMMENT_HISTORY_KEY, JSON.stringify(restored))
+  commentHistory.value = restored
+}
+async function deleteCommentHistory (commentId) {
+  const restored = JSON.parse(localStorage.getItem(COMMENT_HISTORY_KEY)) || []
+  const filtered = restored.filter(({ id }) => `${id}` !== `${commentId}`)
+  localStorage.setItem(COMMENT_HISTORY_KEY, JSON.stringify(filtered))
+  commentHistory.value = filtered
 }
 </script>
