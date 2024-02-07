@@ -6,4 +6,5 @@ export default defineNuxtConfig({
             apiBase: 'https://hasebetest.g.kuroco.app'
         }
     },
+    modules: ['@pinia/nuxt']
 })
