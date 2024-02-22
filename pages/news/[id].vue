@@ -9,8 +9,11 @@
 const route = useRoute();
 const config = useRuntimeConfig();
 
-const { data: response } = await useFetch(`/rcms-api/1/newsdetail/${route.params.id}`,{
-  baseURL:config.public.apiBase,
-  credentials: 'include',
-});
+const { data: response } = await useFetch(
+  `${config.public.apiBase}/rcms-api/1/newsdetail/${route.params.id}`,
+  {
+    credentials: 'include',
+  }
+);
+
 </script>

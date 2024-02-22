@@ -1,19 +1,26 @@
 <template>
+  <ClientOnly>
     <div>
       <h1 class="title">{{ response.details.subject }}</h1>
       <div class="post" v-html="response.details.contents"></div>
     </div>
-  </template>
+  </ClientOnly>
+</template>
   
-  <script setup>
-  const route = useRoute();
-  
-  const {data: response} = useFetch(`/rcms-api/1/news/preview`, {
-    baseURL:config.public.apiBase,
+<script setup>
+const config = useRuntimeConfig();
+
+const route = useRoute();
+const preview_token = route.query.preview_token;
+
+const { data: response } = await useFetch(
+  `${config.public.apiBase}/rcms-api/1/preview`,
+  {
     credentials: 'include',
     params: {
-      preview_token: route.query.preview_token,
+      preview_token,
     },
-  });
-  
-  </script>
+    server: false,
+  }
+);
+</script>
