@@ -10,10 +10,20 @@
       type="password"
       placeholder="password" />
     <button type="submit">Login</button>
+    <div>
+        <nuxt-link to="/news">
+            news list
+        </nuxt-link>
+    </div>
   </form>
 </template>
 
 <script setup>
+  import { useStore } from "~/stores/authentication";
+  const store = useStore();
+  definePageMeta({
+    middleware: "auth",
+  });
   const config = useRuntimeConfig();
 
   const email = ref('');
@@ -42,6 +52,8 @@
   )
   try {
       await request
+      store.setProfile({}); // Apply the dummy object to store.state.profile
+      
       loginStatus.value = 'success'
       resultMessage.value = 'Login successful'
   } catch (e) {

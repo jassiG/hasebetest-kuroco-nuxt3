@@ -11,6 +11,9 @@
     "@nuxtjs/i18n": "^8.5.0",
     "nuxt": "^3.8.0"
   },
+  "overrides": {
+  "vue": "latest"
+},
   "dependencies": {
     "vue3-google-map": "^0.21.0"
   }
