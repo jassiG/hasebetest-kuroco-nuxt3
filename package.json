@@ -9,11 +9,13 @@
   },
   "devDependencies": {
     "@nuxtjs/i18n": "^8.5.0",
-    "nuxt": "^3.8.0"
+    "@pinia/nuxt": "^0.9.0",
+    "nuxt": "^3.8.0",
+    "pinia": "^2.3.1"
   },
   "overrides": {
-  "vue": "latest"
-},
+    "vue": "latest"
+  },
   "dependencies": {
     "vue3-google-map": "^0.21.0"
   }
