@@ -21,9 +21,6 @@
 <script setup>
   import { useStore } from "~/stores/authentication";
   const store = useStore();
-  definePageMeta({
-    middleware: "auth",
-  });
   const config = useRuntimeConfig();
 
   const email = ref('');

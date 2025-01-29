@@ -1,6 +1,15 @@
-export default async ({app, store, redirect}) => {
-  if (!store.getters.authenticated) {
-    return redirect('/login');
+export default defineNuxtRouteMiddleware((to) => {
+  const store = useStore();
+  
+  // Define public paths that don't require authentication (add any login pages that don't require authentication)
+  const publicPaths = ['/login'];
+  
+  // Allow access if the current path is public
+  if (publicPaths.some(path => to.path.startsWith(path))) {
+    return;
   }
-  await null;
-};
+  
+  if (!store.authenticated) {
+    return navigateTo('/login');
+  }
+});

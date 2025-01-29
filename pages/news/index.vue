@@ -10,9 +10,12 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: "auth",
+});
 const config = useRuntimeConfig();
-const { data: response } = await useFetch('/rcms-api/1/news',{
-  baseURL:config.public.apiBase,
+const { data: response } = await useFetch('/rcms-api/1/news', {
+  baseURL: config.public.apiBase,
   credentials: 'include',
 });
 </script>
