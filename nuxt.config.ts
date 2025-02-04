@@ -31,5 +31,10 @@ export default defineNuxtConfig({
                 langDir: "locales/",
             },
         ],
+        'nuxt-gtag',
     ],
+
+    gtag: {
+        id: 'G-2BPFFX57F6'
+      }
 })
