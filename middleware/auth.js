@@ -1,3 +1,5 @@
+import { useStore } from '~/stores/authentication';
+
 export default defineNuxtRouteMiddleware((to) => {
   const store = useStore();
   
