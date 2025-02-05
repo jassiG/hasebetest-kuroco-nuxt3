@@ -1,6 +1,6 @@
 import { useStore } from '~/stores/authentication';
 
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
   const store = useStore();
   
   // Define public paths that don't require authentication (add any login pages that don't require authentication)
@@ -12,6 +12,10 @@ export default defineNuxtRouteMiddleware((to) => {
   }
   
   if (!store.authenticated) {
-    return navigateTo('/login');
+    try {
+      await store.restoreLoginState();
+    } catch (err) {
+      return navigateTo('/login');
+    }
   }
 });
