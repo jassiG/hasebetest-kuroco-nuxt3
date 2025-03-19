@@ -18,29 +18,52 @@ export const useStore = defineStore('authentication', {
       });
     },
     async login(payload) {
-      // dummy request(succeed/fail after 1 sec.)
-      const shouldSuccess = true
-      const request = new Promise((resolve, reject) =>
-        setTimeout(
-          () => (shouldSuccess ? resolve() : reject(Error('login failure'))),
-          1000
-        )
-      )
-      await request
+      await $fetch("/rcms-api/1/login", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        baseURL: useRuntimeConfig().public.apiBase,
+        credentials: "include",
+      });
 
-      this.setProfile({}) // Apply the dummy object to store.state.profile
+      const profileRes = await $fetch("/rcms-api/1/profile", {
+        baseURL: useRuntimeConfig().public.apiBase,
+        credentials: "include",
+      });
+      this.setProfile(profileRes)
       this.updateLocalStorage({ authenticated: true })
+    },
+    async logout() {
+      try {
+        await $fetch("/rcms-api/1/logout", {
+          method: "POST",
+          baseURL: useRuntimeConfig().public.apiBase,
+          credentials: "include",
+        });
+      } catch {
+        /** No Process */
+        /** When it returns errors, it consider that logout is complete and ignore this process. */
+      }
+      this.setProfile(null);
+      this.updateLocalStorage({ authenticated: false });
+
+      navigateTo("/login");
     },
     async restoreLoginState() {
       const authenticated = localStorage.getItem("authenticated");
       const isAuthenticated = authenticated ? JSON.parse(authenticated) : false;
 
       if (!isAuthenticated) {
+        await this.logout();
         throw new Error("need to login");
       }
       try {
-        this.setProfile({}); // Store the dummy object.
+        const profileRes = await $fetch("/rcms-api/1/profile", {
+          baseURL: useRuntimeConfig().public.apiBase,
+          credentials: "include",
+        });
+        this.setProfile(profileRes);
       } catch {
+        await this.logout();
         throw new Error("need to login");
       }
     },

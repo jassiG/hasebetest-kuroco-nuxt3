@@ -1,5 +1,6 @@
 <template>
   <div>
+    <button type="button" @click="logout">Logout</button>
     <p>News list</p>
     <div v-for="n in response.list" :key="n.slug">
       <nuxt-link :to="`/news/${n.topics_id}`">
@@ -10,6 +11,7 @@
 </template>
 
 <script setup>
+import { useStore } from "~/stores/authentication";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -18,4 +20,6 @@ const { data: response } = await useFetch('/rcms-api/1/news', {
   baseURL: config.public.apiBase,
   credentials: 'include',
 });
+const store = useStore();
+const logout = () => store.logout();
 </script>
