@@ -11,7 +11,7 @@
 
 <script setup>
 definePageMeta({
-  middleware: "auth",
+  middleware: ["auth"],
 });
 const config = useRuntimeConfig();
 const { data: response } = await useFetch('/rcms-api/1/news', {
