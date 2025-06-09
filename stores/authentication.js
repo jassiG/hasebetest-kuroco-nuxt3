@@ -53,7 +53,6 @@ export const useStore = defineStore('authentication', {
       const isAuthenticated = authenticated ? JSON.parse(authenticated) : false;
 
       if (!isAuthenticated) {
-        await this.logout();
         throw new Error("need to login");
       }
       try {
