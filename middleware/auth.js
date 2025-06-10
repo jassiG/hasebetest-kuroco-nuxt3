@@ -19,3 +19,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
   }
 });
+
+export const authFetch = (url, config) => {
+  const store = useStore();
+
+  return $fetch(url, {
+    ...config,
+    headers: {
+      ...(config.headers || {}), // Preserve existing headers
+      'X-RCMS-API-ACCESS-TOKEN': store.token, // Add the token
+    },
+  });
+};

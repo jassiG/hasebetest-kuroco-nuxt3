@@ -18,17 +18,16 @@ export const useStore = defineStore('authentication', {
       });
     },
     async login(payload) {
-      const { grant_token } = await $fetch("/rcms-api/1/login", {
-          method: "POST",
-          baseURL: useRuntimeConfig().public.apiBase,
-          credentials: "include",
-          body: payload,
+      await $fetch("/rcms-api/1/login", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        baseURL: useRuntimeConfig().public.apiBase,
+        credentials: "include",
       });
-      const { access_token } = await $fetch("/rcms-api/1/token", {
-          method: "POST",
-          baseURL: useRuntimeConfig().public.apiBase,
-          credentials: "include",
-          body: { grant_token: grant_token },
+
+      const profileRes = await $fetch("/rcms-api/1/profile", {
+        baseURL: useRuntimeConfig().public.apiBase,
+        credentials: "include",
       });
       this.setProfile(profileRes)
       this.updateLocalStorage({ authenticated: true })
@@ -50,12 +49,22 @@ export const useStore = defineStore('authentication', {
       navigateTo("/login");
     },
     async restoreLoginState() {
-      const authenticated = JSON.parse(localStorage.getItem('authenticated'))
+      const authenticated = localStorage.getItem("authenticated");
+      const isAuthenticated = authenticated ? JSON.parse(authenticated) : false;
 
-      if (!authenticated) {
+      if (!isAuthenticated) {
         throw new Error("need to login");
       }
-      this.setProfile({}) // store dummy object.
+      try {
+        const profileRes = await $fetch("/rcms-api/1/profile", {
+          baseURL: useRuntimeConfig().public.apiBase,
+          credentials: "include",
+        });
+        this.setProfile(profileRes);
+      } catch {
+        await this.logout();
+        throw new Error("need to login");
+      }
     },
   },
   getters: {
