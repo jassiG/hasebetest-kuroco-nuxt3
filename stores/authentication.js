@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 export const useStore = defineStore('authentication', {
   state: () => ({
     profile: null,
+    access_token: "",
   }),
   actions: {
     setProfile(profile) {
@@ -30,12 +31,20 @@ export const useStore = defineStore('authentication', {
           credentials: "include",
           body: { grant_token: grant_token },
       });
-      this.setProfile(profileRes)
-      this.updateLocalStorage({ authenticated: true })
+      
+      this.updateLocalStorage({ rcmsApiAccessToken: access_token.value })
+      this.access_token = access_token.value
+      
+      const { authFetch } = useAuthFetch(this.access_token);
+      const profileRes = await authFetch("/rcms-api/1/profile", {
+        baseURL: useRuntimeConfig().public.apiBase,
+      });
+      this.setProfile(profileRes);
     },
     async logout() {
       try {
-        await $fetch("/rcms-api/1/logout", {
+        const { authFetch } = useAuthFetch();
+        await authFetch("/rcms-api/1/logout", {
           method: "POST",
           baseURL: useRuntimeConfig().public.apiBase,
           credentials: "include",
@@ -45,14 +54,15 @@ export const useStore = defineStore('authentication', {
         /** When it returns errors, it consider that logout is complete and ignore this process. */
       }
       this.setProfile(null);
-      this.updateLocalStorage({ authenticated: false });
+      this.access_token = "";
+      this.updateLocalStorage({ rcmsApiAccessToken: null });
 
       navigateTo("/login");
     },
     async restoreLoginState() {
-      const authenticated = JSON.parse(localStorage.getItem('authenticated'))
+      const rcmsApiAccessToken = JSON.parse(localStorage.getItem('rcmsApiAccessToken'))
 
-      if (!authenticated) {
+      if (!rcmsApiAccessToken) {
         throw new Error("need to login");
       }
       this.setProfile({}) // store dummy object.
@@ -60,5 +70,6 @@ export const useStore = defineStore('authentication', {
   },
   getters: {
     authenticated: (state) => state.profile !== null,
+    token: (state) => state.access_token,
   },
 });
