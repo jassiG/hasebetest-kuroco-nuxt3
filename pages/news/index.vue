@@ -12,6 +12,7 @@
 
 <script setup>
 import { useStore } from "~/stores/authentication";
+const store = useStore();
 definePageMeta({
   middleware: ["auth"],
 });
@@ -19,7 +20,9 @@ const config = useRuntimeConfig();
 const { data: response } = await useFetch('/rcms-api/1/news', {
   baseURL: config.public.apiBase,
   credentials: 'include',
+  headers: {
+    'X-RCMS-API-ACCESS-TOKEN': store.access_token,
+  },
 });
-const store = useStore();
 const logout = () => store.logout();
 </script>
